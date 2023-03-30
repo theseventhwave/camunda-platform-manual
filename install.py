@@ -5,23 +5,17 @@ import requests
 import platform
 import stat
 import glob
-from urllib.parse import urlparse
 
 
 # Function to download a file from a URL
-def download_file(url):
-    parsed_url = urlparse(url)
-    file_name = os.path.basename(parsed_url.path)
-    target_path = os.path.join("temp", file_name)
+def download_file(url, file_name):
+    target_path = os.path.join(file_name)
 
     if os.path.exists(target_path):
         print(f"{file_name} already downloaded.")
         return target_path
 
     print(f"Downloading {file_name}...")
-
-    if not os.path.exists("temp"):
-        os.makedirs("temp")
 
     response = requests.get(url, stream=True)
     response.raise_for_status()
@@ -35,7 +29,7 @@ def download_file(url):
 
 
 # Function to extract a ZIP or TAR.GZ file
-def extract_file(filename):
+def extract_file(filename, extract_directory):
     if filename.endswith(".zip"):
         with zipfile.ZipFile(filename, 'r') as archive:
             archive_files = archive.namelist()
@@ -45,17 +39,19 @@ def extract_file(filename):
 
     # Find the common root folder
     extracted_folder = os.path.commonpath(archive_files)
+    extracted_path = os.path.join(extract_directory, extracted_folder)
 
-    if not os.path.exists(extracted_folder):
+    if not os.path.exists(extracted_path):
         if filename.endswith(".zip"):
             with zipfile.ZipFile(filename, 'r') as archive:
-                archive.extractall()
+                archive.extractall(path=extract_directory)
         elif filename.endswith(".tar.gz"):
             with tarfile.open(filename, 'r:gz') as archive:
-                archive.extractall()
-        print(f"{filename} extracted.")
+                archive.extractall(path=extract_directory)
+        print(f"{filename} extracted to {extract_directory}.")
     else:
-        print(f"{extracted_folder} already exists. Skipping extraction.")
+        print(f"{extracted_folder} already exists in {extract_directory}. Skipping extraction.")
+
 
 
 def get_elasticsearch_url(current_platform, current_arch):
@@ -91,6 +87,23 @@ def set_executable_bit(directory_pattern):
     else:
         print("Skipping setting executable bit, as the platform is not Linux or macOS.")
 
+def delete_archive_files(*files):
+    for file in files:
+        if os.path.exists(file):
+            os.remove(file)
+            print(f"{file} deleted.")
+        else:
+            print(f"{file} does not exist.")
+
+def install(url, local_file, executable_bit_directory, extracted_folder_pattern):
+    extracted_folders = glob.glob(extracted_folder_pattern)
+
+    if not extracted_folders:
+        download_file(url, local_file)
+        extract_file(local_file, temp_dir)
+        set_executable_bit(executable_bit_directory)
+        delete_archive_files(local_file)
+
 
 current_platform = platform.system()
 current_arch = platform.machine()
@@ -102,25 +115,32 @@ operate_url = "https://github.com/camunda/camunda-platform/releases/download/8.1
 tasklist_url = "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-tasklist-8.1.9.zip"
 
 # Get local file names
-elasticsearch_file = os.path.basename(elasticsearch_url)
-zeebe_file = os.path.basename(zeebe_url)
-operate_file = os.path.basename(operate_url)
-tasklist_file = os.path.basename(tasklist_url)
+temp_dir = "temp"
+elasticsearch_file = os.path.join(temp_dir, os.path.basename(elasticsearch_url))
+zeebe_file = os.path.join(temp_dir, os.path.basename(zeebe_url))
+operate_file = os.path.join(temp_dir, os.path.basename(operate_url))
+tasklist_file = os.path.join(temp_dir, os.path.basename(tasklist_url))
 
-# Download and extract Camunda components
-download_file(elasticsearch_url)
-download_file(zeebe_url)
-download_file(operate_url)
-download_file(tasklist_url)
+# Get extracted folder patterns
+elasticsearch_folder_pattern = os.path.join(temp_dir, "elasticsearch-*")
+zeebe_folder_pattern = os.path.join(temp_dir, "camunda-zeebe-*")
+operate_folder_pattern = os.path.join(temp_dir, "camunda-operate-*")
+tasklist_folder_pattern = os.path.join(temp_dir, "camunda-tasklist-*")
 
-extract_file(elasticsearch_file)
-extract_file(zeebe_file)
-extract_file(operate_file)
-extract_file(tasklist_file)
+# Get bin directories
+elasticsearch_bin = os.path.join(elasticsearch_folder_pattern, "bin")
+zeebe_bin = os.path.join(zeebe_folder_pattern, "bin")
+operate_bin = os.path.join(operate_folder_pattern, "bin")
+tasklist_bin = os.path.join(tasklist_folder_pattern, "bin")
 
-set_executable_bit("elasticsearch-*/bin")
-set_executable_bit("camunda-zeebe-*/bin")
-set_executable_bit("camunda-operate-*/bin")
-set_executable_bit("camunda-tasklist-*/bin")
+if not os.path.exists(temp_dir):
+    os.makedirs(temp_dir)
+
+# Install Camunda components
+install(elasticsearch_url, elasticsearch_file, elasticsearch_bin, elasticsearch_folder_pattern)
+install(zeebe_url, zeebe_file, zeebe_bin, zeebe_folder_pattern)
+install(operate_url, operate_file, operate_bin, operate_folder_pattern)
+install(tasklist_url, tasklist_file, tasklist_bin, tasklist_folder_pattern)
+
 
 print("Camunda components installed successfully.")
