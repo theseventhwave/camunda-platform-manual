@@ -53,7 +53,6 @@ def extract_file(filename, extract_directory):
         print(f"{extracted_folder} already exists in {extract_directory}. Skipping extraction.")
 
 
-
 def get_elasticsearch_url(current_platform, current_arch):
     if current_platform == 'Windows':
         return 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-windows-x86_64.zip'
@@ -87,6 +86,7 @@ def set_executable_bit(directory_pattern):
     else:
         print("Skipping setting executable bit, as the platform is not Linux or macOS.")
 
+
 def delete_archive_files(*files):
     for file in files:
         if os.path.exists(file):
@@ -94,6 +94,7 @@ def delete_archive_files(*files):
             print(f"{file} deleted.")
         else:
             print(f"{file} does not exist.")
+
 
 def install(url, local_file, executable_bit_directory, extracted_folder_pattern):
     extracted_folders = glob.glob(extracted_folder_pattern)
@@ -103,10 +104,15 @@ def install(url, local_file, executable_bit_directory, extracted_folder_pattern)
         extract_file(local_file, temp_dir)
         set_executable_bit(executable_bit_directory)
         delete_archive_files(local_file)
+    else:
+        print(f"The archive from {url} was already installed.")
 
 
 current_platform = platform.system()
 current_arch = platform.machine()
+
+if current_platform not in ["Windows", "Linux", "Darwin"]:
+    raise ValueError(f"Unsupported platform: {current_platform}")
 
 # Get platform specific URLs
 elasticsearch_url = get_elasticsearch_url(current_platform, current_arch)
