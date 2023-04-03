@@ -1,6 +1,7 @@
 import os
 import subprocess
 import platform
+from config import get_platform_value, load_config
 
 
 # Function to start a process and return its PID
@@ -21,6 +22,8 @@ def is_process_running(pid):
 
 
 current_platform = platform.system()
+current_arch = platform.machine()
+config = load_config()
 
 if current_platform not in ["Windows", "Linux", "Darwin"]:
     raise ValueError(f"Unsupported platform: {current_platform}")
@@ -42,55 +45,13 @@ def start_process_if_not_running(process_name, process_command, pids, env=None):
     else:
         print(f"{process_name.capitalize()} is already running.")
 
-# Environment variables for Zeebe
-zeebe_env = {
-    "ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME": "io.camunda.zeebe.exporter.ElasticsearchExporter",
-    "ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL": "http://localhost:9200",
-    "ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE": "1",
-    "ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK": "0.998",
-    "ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK": "0.999",
-    "JAVA_TOOL_OPTIONS": "-Xms512m -Xmx512m"
-}
 
-# Environment variables for Operate
-operate_env = {
-    "CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS": "localhost:26500",
-    "CAMUNDA_OPERATE_ELASTICSEARCH_URL": "http://localhost:9200",
-    "CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL": "http://localhost:9200",
-    "SERVER_PORT": "8081"
-}
+components = config["components"]
 
-# Environment variables for Tasklist
-tasklist_env = {
-    "CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS": "localhost:26500",
-    "CAMUNDA_TASKLIST_ELASTICSEARCH_URL": "http://localhost:9200",
-    "CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL": "http://localhost:9200",
-    "SERVER_PORT": "8082"
-}
-
-# Environment variables for Elasticsearch
-elasticsearch_env = {
-    "bootstrap.memory_lock": "true",
-    "discovery.type": "single-node",
-    "xpack.security.enabled": "false",
-    "cluster.routing.allocation.disk.threshold_enabled": "false",
-    "ES_JAVA_OPTS": "-Xms512m -Xmx512m"
-}
-
-# Start processes with environment variables
-
-if current_platform == "Windows":
-    elasticsearch_command = "temp\\elasticsearch-*\\bin\\elasticsearch.bat"
-    zeebe_command = "temp\\camunda-zeebe-*\\bin\\broker.bat"
-    operate_command = "temp\\camunda-operate-*\\bin\\operate.bat"
-    tasklist_command = "temp\\camunda-tasklist-*\\bin\\tasklist.bat"
-elif current_platform in ["Linux", "Darwin"]:
-    elasticsearch_command = "temp/elasticsearch-*/bin/elasticsearch"
-    zeebe_command = "temp/camunda-zeebe-*/bin/broker"
-    operate_command = "temp/camunda-operate-*/bin/operate"
-    tasklist_command = "temp/camunda-tasklist-*/bin/tasklist"
-else:
-    raise ValueError("Unsupported platform: {}".format(current_platform))
+for component_name, component_data in components.items():
+    command = get_platform_value(component_data["commands"], current_platform)
+    env = component_data["env"]
+    start_process_if_not_running(component_name, command, pids, env)
 
 
 # Save PIDs to a file for future reference

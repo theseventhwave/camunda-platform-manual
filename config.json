@@ -1,0 +1,82 @@
+{
+  "temp_dir": "temp",
+  "components": {
+    "elasticsearch": {
+      "folder_pattern": "elasticsearch-*",
+      "bin": "bin",
+      "url": {
+        "Windows": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-windows-x86_64.zip",
+        "Darwin": {
+          "x86_64": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-darwin-x86_64.tar.gz",
+          "aarch64": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-darwin-aarch64.tar.gz"
+        },
+        "Linux": {
+          "x86_64": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz",
+          "aarch64": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-aarch64.tar.gz"
+        }
+      },
+      "env": {
+        "bootstrap.memory_lock": "true",
+        "discovery.type": "single-node",
+        "xpack.security.enabled": "false",
+        "cluster.routing.allocation.disk.threshold_enabled": "false",
+        "ES_JAVA_OPTS": "-Xms512m -Xmx512m"
+      },
+      "commands": {
+        "Windows": "{temp_dir}/{folder_pattern}/{bin}/elasticsearch.bat",
+        "Linux": "{temp_dir}/{folder_pattern}/{bin}/elasticsearch",
+        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/elasticsearch"
+      }
+    },
+    "zeebe": {
+      "folder_pattern": "camunda-zeebe-*",
+      "bin": "bin",
+      "url": "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-zeebe-8.1.9.zip",
+      "env": {
+        "ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME": "io.camunda.zeebe.exporter.ElasticsearchExporter",
+        "ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL": "http://localhost:9200",
+        "ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE": "1",
+        "ZEEBE_BROKER_DATA_DISKUSAGECOMMANDWATERMARK": "0.998",
+        "ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK": "0.999",
+        "JAVA_TOOL_OPTIONS": "-Xms512m -Xmx512m"
+      },
+      "commands": {
+        "Windows": "{temp_dir}/{folder_pattern}/{bin}/zeebe.bat",
+        "Linux": "{temp_dir}/{folder_pattern}/{bin}/zeebe",
+        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/zeebe"
+      }
+    },
+    "operate": {
+      "folder_pattern": "camunda-operate-*",
+      "bin": "bin",
+      "url": "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-operate-8.1.9.zip",
+      "env": {
+        "CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS": "localhost:26500",
+        "CAMUNDA_OPERATE_ELASTICSEARCH_URL": "http://localhost:9200",
+        "CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL": "http://localhost:9200",
+        "SERVER_PORT": "8081"
+      },
+      "commands": {
+        "Windows": "{temp_dir}/{folder_pattern}/{bin}/operate.bat",
+        "Linux": "{temp_dir}/{folder_pattern}/{bin}/operate",
+        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/operate"
+      }
+    },
+    "tasklist": {
+      "folder_pattern": "camunda-tasklist-*",
+      "bin": "bin",
+      "url": "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-tasklist-8.1.9.zip",
+      "env": {
+        "CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS": "localhost:26500",
+        "CAMUNDA_TASKLIST_ELASTICSEARCH_URL": "http://localhost:9200",
+        "CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL": "http://localhost:9200",
+        "SERVER_PORT": "8082"
+      },
+      "commands": {
+        "Windows": "{temp_dir}/{folder_pattern}/{bin}/broker.bat",
+        "Linux": "{temp_dir}/{folder_pattern}/{bin}/broker",
+        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/broker"
+      }
+    }
+  }
+}

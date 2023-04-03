@@ -5,6 +5,7 @@ import requests
 import platform
 import stat
 import glob
+from config import get_platform_value, load_config
 
 
 # Function to download a file from a URL
@@ -53,23 +54,6 @@ def extract_file(filename, extract_directory):
         print(f"{extracted_folder} already exists in {extract_directory}. Skipping extraction.")
 
 
-def get_elasticsearch_url(current_platform, current_arch):
-    if current_platform == 'Windows':
-        return 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-windows-x86_64.zip'
-    elif current_platform == 'Darwin':
-        if current_arch == 'x86_64':
-            return 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-darwin-x86_64.tar.gz'
-        else:
-            return 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-darwin-aarch64.tar.gz'
-    elif current_platform == 'Linux':
-        if current_arch == 'x86_64':
-            return 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-x86_64.tar.gz'
-        else:
-            return 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.16.2-linux-aarch64.tar.gz'
-    else:
-        raise ValueError(f"Unsupported platform: {current_platform}")
-
-
 def set_executable_bit(directory_pattern):
     directories = glob.glob(directory_pattern)
     if not directories:
@@ -110,43 +94,25 @@ def install(url, local_file, executable_bit_directory, extracted_folder_pattern)
 
 current_platform = platform.system()
 current_arch = platform.machine()
+config = load_config()
 
 if current_platform not in ["Windows", "Linux", "Darwin"]:
     raise ValueError(f"Unsupported platform: {current_platform}")
 
-# Get platform specific URLs
-elasticsearch_url = get_elasticsearch_url(current_platform, current_arch)
-zeebe_url = "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-zeebe-8.1.9.zip"
-operate_url = "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-operate-8.1.9.zip"
-tasklist_url = "https://github.com/camunda/camunda-platform/releases/download/8.1.9/camunda-tasklist-8.1.9.zip"
-
-# Get local file names
-temp_dir = "temp"
-elasticsearch_file = os.path.join(temp_dir, os.path.basename(elasticsearch_url))
-zeebe_file = os.path.join(temp_dir, os.path.basename(zeebe_url))
-operate_file = os.path.join(temp_dir, os.path.basename(operate_url))
-tasklist_file = os.path.join(temp_dir, os.path.basename(tasklist_url))
-
-# Get extracted folder patterns
-elasticsearch_folder_pattern = os.path.join(temp_dir, "elasticsearch-*")
-zeebe_folder_pattern = os.path.join(temp_dir, "camunda-zeebe-*")
-operate_folder_pattern = os.path.join(temp_dir, "camunda-operate-*")
-tasklist_folder_pattern = os.path.join(temp_dir, "camunda-tasklist-*")
-
-# Get bin directories
-elasticsearch_bin = os.path.join(elasticsearch_folder_pattern, "bin")
-zeebe_bin = os.path.join(zeebe_folder_pattern, "bin")
-operate_bin = os.path.join(operate_folder_pattern, "bin")
-tasklist_bin = os.path.join(tasklist_folder_pattern, "bin")
+temp_dir = config["temp_dir"]
 
 if not os.path.exists(temp_dir):
     os.makedirs(temp_dir)
 
+components = config["components"]
+
 # Install Camunda components
-install(elasticsearch_url, elasticsearch_file, elasticsearch_bin, elasticsearch_folder_pattern)
-install(zeebe_url, zeebe_file, zeebe_bin, zeebe_folder_pattern)
-install(operate_url, operate_file, operate_bin, operate_folder_pattern)
-install(tasklist_url, tasklist_file, tasklist_bin, tasklist_folder_pattern)
+for component_name, component_config in components.items():
+    url = get_platform_value(component_config["url"])
+    folder_pattern = os.path.join(temp_dir, get_platform_value(component_config["folder_pattern"]))
+    bin_dir = os.path.join(folder_pattern, get_platform_value(component_config["bin"]))
+    file = os.path.join(temp_dir, os.path.basename(url))
+    install(url, file, bin_dir, folder_pattern )
 
 
 print("Camunda components installed successfully.")
