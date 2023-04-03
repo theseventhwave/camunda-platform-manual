@@ -22,10 +22,10 @@
         "cluster.routing.allocation.disk.threshold_enabled": "false",
         "ES_JAVA_OPTS": "-Xms512m -Xmx512m"
       },
-      "commands": {
-        "Windows": "{temp_dir}/{folder_pattern}/{bin}/elasticsearch.bat",
-        "Linux": "{temp_dir}/{folder_pattern}/{bin}/elasticsearch",
-        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/elasticsearch"
+      "command": {
+        "Windows": "elasticsearch.bat",
+        "Linux": "elasticsearch",
+        "Darwin": "elasticsearch"
       }
     },
     "zeebe": {
@@ -40,10 +40,10 @@
         "ZEEBE_BROKER_DATA_DISKUSAGEREPLICATIONWATERMARK": "0.999",
         "JAVA_TOOL_OPTIONS": "-Xms512m -Xmx512m"
       },
-      "commands": {
-        "Windows": "{temp_dir}/{folder_pattern}/{bin}/zeebe.bat",
-        "Linux": "{temp_dir}/{folder_pattern}/{bin}/zeebe",
-        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/zeebe"
+      "command": {
+        "Windows": "zeebe.bat",
+        "Linux": "zeebe",
+        "Darwin": "zeebe"
       }
     },
     "operate": {
@@ -56,10 +56,10 @@
         "CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL": "http://localhost:9200",
         "SERVER_PORT": "8081"
       },
-      "commands": {
-        "Windows": "{temp_dir}/{folder_pattern}/{bin}/operate.bat",
-        "Linux": "{temp_dir}/{folder_pattern}/{bin}/operate",
-        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/operate"
+      "command": {
+        "Windows": "operate.bat",
+        "Linux": "operate",
+        "Darwin": "operate"
       }
     },
     "tasklist": {
@@ -72,10 +72,10 @@
         "CAMUNDA_TASKLIST_ZEEBEELASTICSEARCH_URL": "http://localhost:9200",
         "SERVER_PORT": "8082"
       },
-      "commands": {
-        "Windows": "{temp_dir}/{folder_pattern}/{bin}/broker.bat",
-        "Linux": "{temp_dir}/{folder_pattern}/{bin}/broker",
-        "Darwin": "{temp_dir}/{folder_pattern}/{bin}/broker"
+      "command": {
+        "Windows": "broker.bat",
+        "Linux": "broker",
+        "Darwin": "broker"
       }
     }
   }

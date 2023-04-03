@@ -1,14 +1,8 @@
-import os
-import zipfile
-import tarfile
-import requests
 import platform
-import stat
-import glob
 import json
 
 
-def get_platform_value(value, current_platform, current_arch):
+def get_platform_value(value):
     if isinstance(value, str):
         return value
     elif isinstance(value, dict):
@@ -34,19 +28,16 @@ def get_platform_value(value, current_platform, current_arch):
         raise ValueError("Invalid value type.")
 
 
-def recursive_substitute(data, config):
-    if isinstance(data, str):
-        return data.format(**config)
-    elif isinstance(data, list):
-        return [recursive_substitute(item, config) for item in data]
-    elif isinstance(data, dict):
-        return {key: recursive_substitute(value, config) for key, value in data.items()}
-    else:
-        return data
-
-
 def load_config():
     with open("config.json", "r") as file:
-        config = json.load(file)
+        return json.load(file)
 
-    return recursive_substitute(config, config)
+
+current_platform = platform.system()
+current_arch = platform.machine()
+config = load_config()
+
+if current_platform not in ["Windows", "Linux", "Darwin"]:
+    raise ValueError(f"Unsupported platform: {current_platform}")
+
+temp_dir = config["temp_dir"]

@@ -1,7 +1,6 @@
 import os
 import subprocess
-import platform
-from config import get_platform_value, load_config
+import common
 
 
 # Function to start a process and return its PID
@@ -21,23 +20,6 @@ def is_process_running(pid):
         return True
 
 
-current_platform = platform.system()
-current_arch = platform.machine()
-config = load_config()
-
-if current_platform not in ["Windows", "Linux", "Darwin"]:
-    raise ValueError(f"Unsupported platform: {current_platform}")
-
-
-# Load PIDs from a file or create an empty dictionary
-pid_file = "temp/pids.txt"
-if os.path.exists(pid_file):
-    with open(pid_file, "r") as file:
-        pids = {line.split(":")[0]: int(line.split(":")[1]) for line in file.readlines()}
-else:
-    pids = {}
-
-
 # Start Process
 def start_process_if_not_running(process_name, process_command, pids, env=None):
     if process_name not in pids or not is_process_running(pids[process_name]):
@@ -46,12 +28,25 @@ def start_process_if_not_running(process_name, process_command, pids, env=None):
         print(f"{process_name.capitalize()} is already running.")
 
 
-components = config["components"]
+# Load PIDs from a file or create an empty dictionary
+pid_file = f"{common.temp_dir}/pids.txt"
+if os.path.exists(pid_file):
+    with open(pid_file, "r") as file:
+        pids = {line.split(":")[0]: int(line.split(":")[1]) for line in file.readlines()}
+else:
+    pids = {}
 
-for component_name, component_data in components.items():
-    command = get_platform_value(component_data["commands"], current_platform)
-    env = component_data["env"]
-    start_process_if_not_running(component_name, command, pids, env)
+components = common.config["components"]
+
+for component_name, component_config in components.items():
+    folder_pattern = common.get_platform_value(component_config["folder_pattern"])
+    binary = common.get_platform_value(component_config["bin"])
+    command = common.get_platform_value(component_config["command"])
+    env = common.get_platform_value(component_config["env"])
+
+    fq_command = os.path.join(common.temp_dir, folder_pattern, binary, command)
+
+    start_process_if_not_running(component_name, fq_command, pids, env)
 
 
 # Save PIDs to a file for future reference

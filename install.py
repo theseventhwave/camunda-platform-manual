@@ -5,7 +5,7 @@ import requests
 import platform
 import stat
 import glob
-from config import get_platform_value, load_config
+import common
 
 
 # Function to download a file from a URL
@@ -85,34 +85,31 @@ def install(url, local_file, executable_bit_directory, extracted_folder_pattern)
 
     if not extracted_folders:
         download_file(url, local_file)
-        extract_file(local_file, temp_dir)
+        extract_file(local_file, common.temp_dir)
         set_executable_bit(executable_bit_directory)
         delete_archive_files(local_file)
     else:
         print(f"The archive from {url} was already installed.")
 
+if not os.path.exists(common.temp_dir):
+    os.makedirs(common.temp_dir)
 
-current_platform = platform.system()
-current_arch = platform.machine()
-config = load_config()
-
-if current_platform not in ["Windows", "Linux", "Darwin"]:
-    raise ValueError(f"Unsupported platform: {current_platform}")
-
-temp_dir = config["temp_dir"]
-
-if not os.path.exists(temp_dir):
-    os.makedirs(temp_dir)
-
-components = config["components"]
+components = common.config["components"]
 
 # Install Camunda components
 for component_name, component_config in components.items():
-    url = get_platform_value(component_config["url"])
-    folder_pattern = os.path.join(temp_dir, get_platform_value(component_config["folder_pattern"]))
-    bin_dir = os.path.join(folder_pattern, get_platform_value(component_config["bin"]))
-    file = os.path.join(temp_dir, os.path.basename(url))
-    install(url, file, bin_dir, folder_pattern )
+
+    url = common.get_platform_value(component_config["url"])
+    file = os.path.basename(url)
+    folder_pattern = common.get_platform_value(component_config["folder_pattern"])
+    binary = common.get_platform_value(component_config["bin"])
+    command = common.get_platform_value(component_config["command"])
+
+    fq_folder_pattern = os.path.join(common.temp_dir, folder_pattern)
+    fq_binary = os.path.join(fq_folder_pattern, binary)
+    fq_file = os.path.join(common.temp_dir, os.path.basename(url))
+
+    install(url, fq_file, fq_binary, fq_folder_pattern)
 
 
 print("Camunda components installed successfully.")
