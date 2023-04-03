@@ -29,9 +29,8 @@ def start_process_if_not_running(process_name, process_command, pids, env=None):
 
 
 # Load PIDs from a file or create an empty dictionary
-pid_file = f"{common.temp_dir}/pids.txt"
-if os.path.exists(pid_file):
-    with open(pid_file, "r") as file:
+if os.path.exists(common.pid_file):
+    with open(common.pid_file, "r") as file:
         pids = {line.split(":")[0]: int(line.split(":")[1]) for line in file.readlines()}
 else:
     pids = {}
@@ -42,7 +41,7 @@ for component_name, component_config in components.items():
     folder_pattern = common.get_platform_value(component_config["folder_pattern"])
     binary = common.get_platform_value(component_config["bin"])
     command = common.get_platform_value(component_config["command"])
-    env = common.get_platform_value(component_config["env"])
+    env = component_config["env"]
 
     fq_command = os.path.join(common.temp_dir, folder_pattern, binary, command)
 
@@ -50,7 +49,7 @@ for component_name, component_config in components.items():
 
 
 # Save PIDs to a file for future reference
-with open(pid_file, "w") as file:
+with open(common.pid_file, "w") as file:
     for key, value in pids.items():
         file.write(f"{key}:{value}\n")
 

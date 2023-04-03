@@ -1,16 +1,9 @@
 import os
 import shutil
-import platform
+import common
 
-current_platform = platform.system()
-
-if current_platform not in ["Windows", "Linux", "Darwin"]:
-    raise ValueError(f"Unsupported platform: {current_platform}")
-
-temp_dir = "temp"
-
-if os.path.exists(temp_dir):
-    shutil.rmtree(temp_dir)
-    print(f"The '{temp_dir}' directory has been deleted.")
+if os.path.exists(common.temp_dir):
+    shutil.rmtree(common.temp_dir)
+    print(f"The '{common.temp_dir}' directory has been deleted.")
 else:
-    print(f"The '{temp_dir}' directory does not exist.")
+    print(f"The '{common.temp_dir}' directory does not exist.")

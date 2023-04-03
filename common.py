@@ -41,3 +41,4 @@ if current_platform not in ["Windows", "Linux", "Darwin"]:
     raise ValueError(f"Unsupported platform: {current_platform}")
 
 temp_dir = config["temp_dir"]
+pid_file = f"{temp_dir}/pids.txt"

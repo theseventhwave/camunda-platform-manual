@@ -41,9 +41,9 @@
         "JAVA_TOOL_OPTIONS": "-Xms512m -Xmx512m"
       },
       "command": {
-        "Windows": "zeebe.bat",
-        "Linux": "zeebe",
-        "Darwin": "zeebe"
+        "Windows": "broker.bat",
+        "Linux": "broker",
+        "Darwin": "broker"
       }
     },
     "operate": {
@@ -73,9 +73,9 @@
         "SERVER_PORT": "8082"
       },
       "command": {
-        "Windows": "broker.bat",
-        "Linux": "broker",
-        "Darwin": "broker"
+        "Windows": "tasklist.bat",
+        "Linux": "tasklist",
+        "Darwin": "tasklist"
       }
     }
   }
