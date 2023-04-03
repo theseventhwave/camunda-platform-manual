@@ -43,7 +43,7 @@ for component_name, component_config in components.items():
     command = common.get_platform_value(component_config["command"])
     env = component_config["env"]
 
-    fq_command = os.path.join(common.temp_dir, folder_pattern, binary, command)
+    fq_command = os.path.join(common.install_dir, folder_pattern, binary, command)
 
     start_process_if_not_running(component_name, fq_command, pids, env)
 

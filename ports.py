@@ -12,19 +12,25 @@ def get_listening_ports(pid):
     else:
         raise NotImplementedError("Unsupported platform")
 
-    output = subprocess.check_output(command, shell=True, text=True)
     ports = set()
 
-    if common.current_platform == "Windows":
-        for line in output.splitlines():
-            if line.strip():
-                ports.add(int(line.split()[-1]))
-    else:
-        for line in output.splitlines()[1:]:
-            if line.strip():
-                ports.add(int(line.split()[8].split(":")[-1]))
+    try:
+        output = subprocess.check_output(command, shell=True, text=True)
+
+        if common.current_platform == "Windows":
+            for line in output.splitlines():
+                if line.strip():
+                    ports.add(int(line.split()[-1]))
+        else:
+            for line in output.splitlines()[1:]:
+                if line.strip():
+                    ports.add(int(line.split()[8].split(":")[-1]))
+    except subprocess.CalledProcessError as e:
+        return set()
 
     return ports
+
+
 
 
 # Load PIDs from the file

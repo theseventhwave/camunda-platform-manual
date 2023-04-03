@@ -1,5 +1,5 @@
 {
-  "temp_dir": "temp",
+  "install_dir": "components",
   "components": {
     "elasticsearch": {
       "folder_pattern": "elasticsearch-*",

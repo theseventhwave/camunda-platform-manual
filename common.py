@@ -40,5 +40,5 @@ config = load_config()
 if current_platform not in ["Windows", "Linux", "Darwin"]:
     raise ValueError(f"Unsupported platform: {current_platform}")
 
-temp_dir = config["temp_dir"]
-pid_file = f"{temp_dir}/pids.txt"
+install_dir = config["install_dir"]
+pid_file = f"{install_dir}/pids.txt"

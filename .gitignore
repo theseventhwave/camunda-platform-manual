@@ -137,5 +137,5 @@ dmypy.json
 out/
 .idea_modules/
 
-temp/
+components/
 

@@ -85,14 +85,14 @@ def install(url, local_file, executable_bit_directory, extracted_folder_pattern)
 
     if not extracted_folders:
         download_file(url, local_file)
-        extract_file(local_file, common.temp_dir)
+        extract_file(local_file, common.install_dir)
         set_executable_bit(executable_bit_directory)
         delete_archive_files(local_file)
     else:
         print(f"The archive from {url} was already installed.")
 
-if not os.path.exists(common.temp_dir):
-    os.makedirs(common.temp_dir)
+if not os.path.exists(common.install_dir):
+    os.makedirs(common.install_dir)
 
 components = common.config["components"]
 
@@ -105,9 +105,9 @@ for component_name, component_config in components.items():
     binary = common.get_platform_value(component_config["bin"])
     command = common.get_platform_value(component_config["command"])
 
-    fq_folder_pattern = os.path.join(common.temp_dir, folder_pattern)
+    fq_folder_pattern = os.path.join(common.install_dir, folder_pattern)
     fq_binary = os.path.join(fq_folder_pattern, binary)
-    fq_file = os.path.join(common.temp_dir, os.path.basename(url))
+    fq_file = os.path.join(common.install_dir, os.path.basename(url))
 
     install(url, fq_file, fq_binary, fq_folder_pattern)
 
